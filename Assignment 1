@@ -1,0 +1,37 @@
+class ParkingSpot:
+    lot_name = "City Center Parking"
+    max_vehicles = 3
+    total_spots = 0
+
+    def __init__(self,spot_number, level):
+        self.spot_number = spot_number
+        self.level = level
+        self.vehicles = []
+        ParkingSpot.total_spots += 1
+    
+    def park_vehicle(self,plate):
+        if  len(self.vehicles) < ParkingSpot.max_vehicles:
+            self.vehicles.append(plate)
+            print(f"Parked vehicle {plate} at Spot {self.spot_number}")
+        else: 
+            print("Spot is full")
+    
+    def remove_vehicle(self,plate):
+        if plate in self.vehicles:
+            self.vehicles.remove(plate)
+            print(f"Removed vehicle {plate} from Spot {self.spot_number}")
+        else:
+            print("Vehicle not found")
+
+    def display_spot(self):
+        print(f"Spot {self.spot_number} on Level {self.level} at {ParkingSpot.lot_name}")
+
+first_spot = ParkingSpot(42,"B2")
+first_spot.display_spot()
+first_spot.park_vehicle("AA 123")
+first_spot.park_vehicle("BB 456")
+first_spot.park_vehicle("CC 789")
+first_spot.park_vehicle("DD 000")
+first_spot.remove_vehicle("BB 456")
+first_spot.remove_vehicle("ZZ 999")
+print(f"Total spots: {ParkingSpot.total_spots}")
