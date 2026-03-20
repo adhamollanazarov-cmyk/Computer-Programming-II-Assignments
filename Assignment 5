@@ -1,0 +1,117 @@
+from abc import ABC, abstractmethod
+
+class Rule(ABC):
+    def __init__(self,name):
+        self.name = name
+    @abstractmethod
+    def test(self, value):
+        ...
+    def evaluate(self, value):
+        testing = self.test(value)
+        if testing:
+            status = 'PASS'
+        else:
+            status = 'FAIL'
+        print(f'[{status}] {self.name}: {value}')
+        return testing
+
+class MinLengthRule(Rule):
+    def __init__(self,min_len):
+        super().__init__(f'MinLength({min_len})')
+        self.min_len = min_len
+    def test(self, value):
+        return len(value) >= self.min_len
+            
+class HasUppercaseRule(Rule):
+    def __init__(self):
+        super().__init__('HasUppercase')
+    def test(self, value):
+        for c in value:
+            if c == c.upper() and c.lower() in 'abcdefghijklmnopqrstuvwxyz':
+                return True
+        return False
+    
+class HasSpecialCharRule(Rule):
+    def __init__(self):
+        super().__init__('HasSpecialChar')
+    def test(self, value):
+        for c in value:
+            if c.lower() not in 'abcdefghijklmnopqrstuvwxyz':
+                return True
+    
+class NoRepeatingCharsRule:
+    def __init__(self, name = "NoRepeatingChars"):
+        self.name = 'NoRepeatingChars'
+    def test(self, value):
+        for i in range(len(value)-1):
+            if value[i] == value[i+1]:
+                return False
+        return True
+    def evaluate(self, value):
+        testing = self.test(value)
+        if testing:
+            status = 'PASS'
+        else:
+            status = 'FAIL'
+        print(f'[{status}] {self.name}: {value}')
+        return testing
+    
+class StrengthReport:
+    def __init__(self):
+        self.entries = []
+    def add(self, rule_name, value, passed):
+        self.entries.append((rule_name, value, passed))
+    def summary(self):
+        total_passed = 0
+        for c in self.entries:
+            if c[2]:
+                total_passed += 1
+        total = len(self.entries)
+        total_failed = total - total_passed
+        print(f"Total: {total}, Passed: {total_passed}, Failed: {total_failed}")
+
+class PasswordField:
+    def __init__(self,field_name):
+        self.field_name = field_name 
+        self.rules = []
+        self.strengthed_report = StrengthReport()
+    def add_rule(self, rule):
+        self.rules.append(rule)
+    def check(self, value):
+        print(f'Checking {self.field_name}: "{value}"')
+        status = True
+        for rule in self.rules:
+            evaluation = rule.evaluate(value)
+            self.strengthed_report.add(rule.name, value, evaluation)
+            if not evaluation:
+                status = False
+        return status
+    def show_report(self):
+        print(f"--- Report for {self.field_name} ---")
+        self.strengthed_report.summary()
+
+
+password_field = PasswordField('password')
+password_field.add_rule(MinLengthRule(8))
+password_field.add_rule(HasUppercaseRule())
+password_field.add_rule(HasSpecialCharRule())
+password_field.add_rule(NoRepeatingCharsRule())
+
+valid1 = password_field.check('Str0ng!Pw')
+print(f'Valid: {valid1}')
+print()
+
+valid2 = password_field.check('short')
+print(f'Valid: {valid2}')
+print()
+
+valid3 = password_field.check('aabbccdd!!')
+print(f'Valid: {valid3}')
+print()
+
+password_field.show_report()
+
+try:
+    r = Rule('test')
+except TypeError:
+    print('Cannot instantiate abstract class')
