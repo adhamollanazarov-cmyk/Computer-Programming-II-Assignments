@@ -1,0 +1,57 @@
+from dataclasses import dataclass, field
+
+@dataclass
+class Material:
+    name: str
+    kilograms: float
+    cost_per_kg: float
+    def __post_init__(self):
+        self._update()
+    def _update(self):
+        pass
+    def total_cost(self) -> float:
+        return self.kilograms * self.cost_per_kg
+@dataclass
+class Project:
+    title: str
+    units: int
+    materials: list[Material] = field(default_factory=list)
+    total_cost: float = field(init=False)
+    def __post_init__(self):
+        self._update
+    def _update(self):
+        self.total_cost = 0
+        for material in self.materials:
+            self.total_cost += material.total_cost()
+    def add_material(self, material: Material):
+        self.materials.append(material)
+        self._update()
+    def cost_per_unit(self) -> float:
+        return self.total_cost / self.units
+    def scale(self, new_units: int):
+        ratio = new_units / self.units
+        for material in self.materials:
+            material.kilograms *= ratio
+            material._update()
+        self.units = new_units
+        self._update()
+    def display(self) -> str:
+        text = f"{self.title} ({self.units} units):\n"
+        
+        for material in self.materials:
+            text += f"    {material.name}: {material.kilograms}kg (${material.total_cost()})\n"
+        
+        text += f"Per unit: ${self.cost_per_unit()}\n"
+        return text
+
+p = Project("Bookshelf", 10)
+p.add_material(Material("Wood", 50.0, 8.0))
+p.add_material(Material("Nails", 5.0, 3.5))
+p.add_material(Material("Varnish", 10.0, 12.0))
+
+print(p.total_cost)
+print(p.cost_per_unit())
+print(p.display())
+
+p.scale(5)
+print(p.display())
